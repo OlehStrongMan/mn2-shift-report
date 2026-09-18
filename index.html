@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>สรุปงานซ่อม MN2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --base: #faf8f4;
+    --panel: #ffffff;
+    --line: #e8e2d8;
+    --ink: #2b2621;
+    --muted: #8a8175;
+    --muted-dim: #b3aa9c;
+
+    --accent: #4a6d7c;
+    --accent-soft: #eaf1f2;
+    --accent-dark: #395661;
+
+    --done: #4d7a52;
+    --done-soft: #eef4ec;
+
+    --alert: #b3573f;
+    --alert-soft: #fbf0ec;
+
+    --thai: 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --radius: 12px;
+  }
+
+  /* Theme variants — เปลี่ยนแค่ accent tokens, พื้นหลัง/ตัวหนังสือหลักคงเดิมทุกธีม
+     ทุกสีตรวจสอบแล้วว่าผ่าน WCAG AA (สีขาวบน accent >= 5.5:1, accent บนพื้นครีม >= 5.2:1) */
+  html[data-theme="forest"] {
+    --accent: #3f6b4f; --accent-soft: #eaf2ec; --accent-dark: #305439;
+  }
+  html[data-theme="plum"] {
+    --accent: #6b4a6f; --accent-soft: #f1eaf2; --accent-dark: #55395a;
+  }
+  html[data-theme="ocean"] {
+    --accent: #2f5f8a; --accent-soft: #e9eff5; --accent-dark: #234a6c;
+  }
+  html[data-theme="clay"] {
+    --accent: #8a5a3f; --accent-soft: #f4ede8; --accent-dark: #6d4630;
+  }
+  html[data-theme="ink"] {
+    --accent: #4a4642; --accent-soft: #ecebe9; --accent-dark: #363330;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html { background: var(--base); }
+  body {
+    margin: 0;
+    font-family: var(--thai);
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--base);
+  }
+
+  .wrap { max-width: 640px; margin: 0 auto; padding: 28px 18px 56px; }
+
+  /* ===== Header ===== */
+  header.top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0 24px;
+  }
+  header.top h1 {
+    font-size: 21px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  header.top p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13.5px;
+  }
+
+  .theme-picker {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+    padding-top: 3px;
+  }
+  .theme-picker button {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+  }
+  .theme-picker button::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    border-radius: 50%;
+    background: var(--swatch);
+  }
+  .theme-picker button.active {
+    border-color: var(--swatch);
+  }
+
+  /* ===== Panel (card) ===== */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 2px rgba(43, 38, 33, 0.04);
+  }
+
+  .field { margin-bottom: 20px; }
+  .field:last-child { margin-bottom: 0; }
+  .field .field-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 9px;
+  }
+
+  .seg {
+    display: flex;
+    gap: 4px;
+    background: var(--base);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .seg button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 11px 8px;
+    font-family: var(--thai);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .seg button.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  input[type="date"] {
+    width: 100%;
+    padding: 12px 13px;
+    font-family: var(--thai);
+    font-size: 15px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--base);
+    color: var(--ink);
+  }
+  input[type="date"]:focus { outline: none; border-color: var(--accent); }
+
+  .btn-primary {
+    width: 100%;
+    padding: 15px;
+    font-family: var(--thai);
+    font-size: 15.5px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .btn-primary:disabled { opacity: 0.45; }
+  .btn-primary:active:not(:disabled) { background: var(--accent-dark); }
+
+  /* ===== Loading ===== */
+  .loading { display: none; padding: 56px 16px 40px; text-align: center; }
+  .loading.show { display: block; }
+  .spinner {
+    width: 34px; height: 34px;
+    border: 3px solid var(--line);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    animation: spin 0.85s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { color: var(--muted); font-size: 14px; margin: 0; }
+  .loading p.sub { font-size: 12.5px; margin-top: 5px; color: var(--muted-dim); }
+
+  /* ===== Results ===== */
+  .results { display: none; }
+  .results.show { display: block; animation: fadein 0.2s ease; }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 26px 0 12px;
+    color: var(--ink);
+  }
+  .section-title .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .section-title.closed .dot { background: var(--done); }
+  .section-title.pending .dot { background: var(--alert); }
+  .section-title .count {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--base);
+    border: 1px solid var(--line);
+    padding: 2px 9px;
+    border-radius: 999px;
+  }
+
+  .job-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 10px;
+    background: var(--panel);
+  }
+  .job-card .machine {
+    font-weight: 700;
+    font-size: 14.5px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+  }
+  .job-card .machine .num {
+    color: var(--muted-dim);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .job-card .row { margin-bottom: 10px; }
+  .job-card .row:last-child { margin-bottom: 0; }
+  .job-card .row-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .job-card textarea {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 9px 11px;
+    font-size: 14px;
+    font-family: var(--thai);
+    color: var(--ink);
+    background: var(--base);
+    resize: vertical;
+    min-height: 38px;
+  }
+  .job-card textarea:focus { outline: none; border-color: var(--accent); }
+  .job-card .time-range {
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+
+  .pending-card {
+    border: 1px solid var(--line);
+    background: var(--alert-soft);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 9px;
+  }
+  .pending-card .machine {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+  .pending-card .desc {
+    font-size: 13.5px;
+    color: #5c5449;
+    margin-bottom: 9px;
+    line-height: 1.45;
+  }
+  .pending-card .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+  }
+  .pending-card .meta .assignee { color: var(--muted); }
+  .pending-card .status-badge {
+    font-weight: 700;
+    color: var(--alert);
+  }
+
+  .empty-note {
+    text-align: center;
+    padding: 26px 16px;
+    color: var(--muted);
+    font-size: 13.5px;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+  }
+
+  .copy-bar {
+    position: sticky;
+    bottom: 0;
+    padding: 16px 0 0;
+    margin-top: 24px;
+    background: linear-gradient(to top, var(--base) 65%, transparent);
+  }
+  .btn-copy {
+    width: 100%;
+    padding: 16px;
+    font-family: var(--thai);
+    font-size: 15.5px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--done);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .btn-copy.copied { background: var(--muted-dim); }
+
+  .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 12px;
+    font-size: 13.5px;
+    color: var(--muted);
+    text-decoration: underline;
+    background: none;
+    border: none;
+    width: 100%;
+    padding: 8px;
+    font-family: var(--thai);
+    cursor: pointer;
+  }
+
+  .error-box {
+    display: none;
+    background: var(--alert-soft);
+    border: 1px solid #ecd2c6;
+    color: var(--alert);
+    padding: 14px;
+    border-radius: var(--radius);
+    font-size: 13.5px;
+    margin-bottom: 16px;
+  }
+  .error-box.show { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>สรุปงานซ่อม MN2</h1>
+      <p>เลือกทีมและกะ เพื่อดูงานที่ปิดแล้วและงานค้าง</p>
+    </div>
+    <div class="theme-picker" id="themePicker">
+      <button data-theme="steel" style="--swatch:#4a6d7c" aria-label="Steel"></button>
+      <button data-theme="forest" style="--swatch:#3f6b4f" aria-label="Forest"></button>
+      <button data-theme="plum" style="--swatch:#6b4a6f" aria-label="Plum"></button>
+      <button data-theme="ocean" style="--swatch:#2f5f8a" aria-label="Ocean"></button>
+      <button data-theme="clay" style="--swatch:#8a5a3f" aria-label="Clay"></button>
+      <button data-theme="ink" style="--swatch:#4a4642" aria-label="Ink"></button>
+    </div>
+  </header>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- ===== Form Screen ===== -->
+  <div class="panel" id="formScreen">
+    <div class="field">
+      <div class="field-label">ทีม</div>
+      <div class="seg" id="teamSeg">
+        <button data-value="F1">F1</button>
+        <button data-value="F2">F2</button>
+        <button data-value="AS">AS</button>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">กะ</div>
+      <div class="seg" id="shiftSeg">
+        <button data-value="Day">D กลางวัน</button>
+        <button data-value="Night">N กลางคืน</button>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">วันที่</div>
+      <input type="date" id="dateInput">
+    </div>
+    <button class="btn-primary" id="submitBtn">ดูรายงาน</button>
+  </div>
+
+  <!-- ===== Loading Screen ===== -->
+  <div class="loading" id="loadingScreen">
+    <div class="spinner"></div>
+    <p>กำลังดึงข้อมูลจากระบบ...</p>
+    <p class="sub">อาจใช้เวลาสักครู่ (ไม่เกิน 1 นาที)</p>
+  </div>
+
+  <!-- ===== Results Screen ===== -->
+  <div class="results" id="resultsScreen">
+
+    <div class="section-title closed">
+      <span class="dot"></span> งานที่ปิดแล้ว <span class="count" id="closedCount">0</span>
+    </div>
+    <div id="closedList"></div>
+
+    <div class="section-title pending">
+      <span class="dot"></span> งานค้าง (ยังไม่เสร็จ) <span class="count" id="pendingCount">0</span>
+    </div>
+    <div id="pendingList"></div>
+
+    <div class="copy-bar">
+      <button class="btn-copy" id="copyBtn">คัดลอกรายงาน</button>
+      <button class="back-link" id="backBtn">← เลือกทีม/กะ ใหม่</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ====== Config ======
+  var N8N_BASE = "https://adminmt2.app.n8n.cloud/webhook";
+  var AUTOMATION_KEY = "mn2-cmms-secret-9f8k2x7q";
+  var POLL_INTERVAL_MS = 3000;
+  var POLL_MAX_ATTEMPTS = 40; // 40 * 3s = 120s timeout
+
+  var TEAM_LABELS = { F1: "Feeder 1", F2: "Feeder 2", AS: "Ass'y" };
+
+  // ====== DOM refs ======
+  var formScreen = document.getElementById("formScreen");
+  var loadingScreen = document.getElementById("loadingScreen");
+  var resultsScreen = document.getElementById("resultsScreen");
+  var errorBox = document.getElementById("errorBox");
+  var submitBtn = document.getElementById("submitBtn");
+  var copyBtn = document.getElementById("copyBtn");
+  var backBtn = document.getElementById("backBtn");
+  var dateInput = document.getElementById("dateInput");
+  var teamSeg = document.getElementById("teamSeg");
+  var shiftSeg = document.getElementById("shiftSeg");
+
+  var state = { team: "F1", shift: "Day", date: "" };
+  var lastReport = null; // { team, shift, date, closed_jobs, pending_jobs }
+
+  // ====== Theme picker ======
+  var themePicker = document.getElementById("themePicker");
+  var THEME_STORAGE_KEY = "mn2_shift_report_theme";
+
+  function applyTheme(themeName) {
+    if (themeName === "steel") {
+      document.documentElement.removeAttribute("data-theme");
+    } else {
+      document.documentElement.setAttribute("data-theme", themeName);
+    }
+    var buttons = themePicker.querySelectorAll("button");
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].classList.toggle("active", buttons[i].dataset.theme === themeName);
+    }
+    try { localStorage.setItem(THEME_STORAGE_KEY, themeName); } catch (e) { /* ignore */ }
+  }
+
+  themePicker.addEventListener("click", function (e) {
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    applyTheme(btn.dataset.theme);
+  });
+
+  (function initTheme() {
+    var saved = "steel";
+    try { saved = localStorage.getItem(THEME_STORAGE_KEY) || "steel"; } catch (e) { /* ignore */ }
+    applyTheme(saved);
+  })();
+
+  // ====== Init defaults ======
+  function initDefaults() {
+    var now = new Date();
+    var y = now.getFullYear();
+    var m = String(now.getMonth() + 1).padStart(2, "0");
+    var d = String(now.getDate()).padStart(2, "0");
+    dateInput.value = y + "-" + m + "-" + d;
+    state.date = dateInput.value;
+
+    var minutesNow = now.getHours() * 60 + now.getMinutes();
+    var dayStart = 7 * 60 + 40;
+    var dayEnd = 19 * 60 + 40;
+    state.shift = (minutesNow >= dayStart && minutesNow < dayEnd) ? "Day" : "Night";
+
+    setSegActive(shiftSeg, state.shift);
+    setSegActive(teamSeg, state.team);
+  }
+
+  function setSegActive(segEl, value) {
+    var buttons = segEl.querySelectorAll("button");
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].classList.toggle("active", buttons[i].dataset.value === value);
+    }
+  }
+
+  teamSeg.addEventListener("click", function (e) {
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    state.team = btn.dataset.value;
+    setSegActive(teamSeg, state.team);
+  });
+
+  shiftSeg.addEventListener("click", function (e) {
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    state.shift = btn.dataset.value;
+    setSegActive(shiftSeg, state.shift);
+  });
+
+  dateInput.addEventListener("change", function () {
+    state.date = dateInput.value;
+  });
+
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.classList.add("show");
+  }
+  function hideError() {
+    errorBox.classList.remove("show");
+  }
+
+  function uuid() {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      var r = (Math.random() * 16) | 0;
+      var v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  // ====== Submit flow ======
+  submitBtn.addEventListener("click", function () {
+    if (!state.date) {
+      showError("กรุณาเลือกวันที่");
+      return;
+    }
+    hideError();
+    startPolling();
+  });
+
+  function startPolling() {
+    formScreen.style.display = "none";
+    loadingScreen.classList.add("show");
+    resultsScreen.classList.remove("show");
+
+    var requestId = uuid();
+
+    fetch(N8N_BASE + "/shift-report-request", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Automation-Key": AUTOMATION_KEY,
+      },
+      body: JSON.stringify({
+        request_id: requestId,
+        team: state.team,
+        shift: state.shift,
+        date: state.date,
+      }),
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error("ส่งคำขอไม่สำเร็จ (" + r.status + ")");
+        return r.json();
+      })
+      .then(function () {
+        pollForResult(requestId, 0);
+      })
+      .catch(function (err) {
+        backToForm();
+        showError("เกิดข้อผิดพลาด: " + err.message);
+      });
+  }
+
+  function pollForResult(requestId, attempt) {
+    if (attempt >= POLL_MAX_ATTEMPTS) {
+      backToForm();
+      showError("รอผลนานเกินไป กรุณาลองใหม่อีกครั้ง");
+      return;
+    }
+
+    fetch(
+      N8N_BASE + "/shift-report-poll?request_id=" + encodeURIComponent(requestId),
+      { headers: { "X-Automation-Key": AUTOMATION_KEY } }
+    )
+      .then(function (r) {
+        if (!r.ok) throw new Error("เช็คผลไม่สำเร็จ (" + r.status + ")");
+        return r.json();
+      })
+      .then(function (body) {
+        if (body.status === "done" && body.result) {
+          showResults(body.result);
+        } else {
+          setTimeout(function () {
+            pollForResult(requestId, attempt + 1);
+          }, POLL_INTERVAL_MS);
+        }
+      })
+      .catch(function (err) {
+        backToForm();
+        showError("เกิดข้อผิดพลาด: " + err.message);
+      });
+  }
+
+  function backToForm() {
+    loadingScreen.classList.remove("show");
+    resultsScreen.classList.remove("show");
+    formScreen.style.display = "block";
+  }
+
+  backBtn.addEventListener("click", function () {
+    hideError();
+    backToForm();
+  });
+
+  // ====== Render results ======
+  function formatThaiTime(isoUtc) {
+    if (!isoUtc) return "-";
+    var iso = isoUtc;
+    if (!/[Zz]|[+-]\d{2}:\d{2}$/.test(iso)) iso += "Z";
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "-";
+    return d.toLocaleTimeString("th-TH", {
+      hour: "2-digit", minute: "2-digit", timeZone: "Asia/Bangkok",
+    });
+  }
+
+  function escapeHtml(s) {
+    var div = document.createElement("div");
+    div.textContent = s == null ? "" : String(s);
+    return div.innerHTML;
+  }
+
+  function showResults(result) {
+    lastReport = result;
+    loadingScreen.classList.remove("show");
+    resultsScreen.classList.add("show");
+
+    var closed = result.closed_jobs || [];
+    var pending = result.pending_jobs || [];
+
+    document.getElementById("closedCount").textContent = closed.length;
+    document.getElementById("pendingCount").textContent = pending.length;
+
+    renderClosedJobs(closed);
+    renderPendingJobs(pending);
+  }
+
+  function renderClosedJobs(jobs) {
+    var container = document.getElementById("closedList");
+    container.innerHTML = "";
+
+    if (jobs.length === 0) {
+      container.innerHTML = '<div class="empty-note">ไม่มีงานที่ปิดในกะนี้</div>';
+      return;
+    }
+
+    jobs.forEach(function (job, idx) {
+      var card = document.createElement("div");
+      card.className = "job-card";
+      card.innerHTML =
+        '<div class="machine"><span class="num">' + (idx + 1) + '.</span>' + escapeHtml(job.machine_name) + '</div>' +
+        '<div class="row">' +
+          '<div class="row-label">อาการ</div>' +
+          '<textarea data-field="description" rows="1">' + escapeHtml(job.description) + '</textarea>' +
+        '</div>' +
+        '<div class="row">' +
+          '<div class="row-label">สาเหตุ</div>' +
+          '<textarea data-field="cause" rows="1">' + escapeHtml(job.cause) + '</textarea>' +
+        '</div>' +
+        '<div class="row">' +
+          '<div class="row-label">การแก้ไข</div>' +
+          '<textarea data-field="correction" rows="1">' + escapeHtml(job.correction) + '</textarea>' +
+        '</div>' +
+        '<div class="row">' +
+          '<div class="row-label">เวลา</div>' +
+          '<div class="time-range">' +
+            formatThaiTime(job.start_work_at) + ' - ' + formatThaiTime(job.actual_finish_time) +
+          '</div>' +
+        '</div>';
+      card.dataset.machineName = job.machine_name || "";
+      container.appendChild(card);
+    });
+  }
+
+  function renderPendingJobs(jobs) {
+    var container = document.getElementById("pendingList");
+    container.innerHTML = "";
+
+    if (jobs.length === 0) {
+      container.innerHTML = '<div class="empty-note">ไม่มีงานค้าง 🎉</div>';
+      return;
+    }
+
+    jobs.forEach(function (job) {
+      var card = document.createElement("div");
+      card.className = "pending-card";
+      card.innerHTML =
+        '<div class="machine">' + escapeHtml(job.machine_name) + '</div>' +
+        '<div class="desc">' + escapeHtml(job.description) + '</div>' +
+        '<div class="meta">' +
+          '<span class="assignee">' + escapeHtml(job.assignee_name || "-") + '</span>' +
+          '<span class="status-badge">' + escapeHtml(job.status) + '</span>' +
+        '</div>';
+      container.appendChild(card);
+    });
+  }
+
+  // ====== Build report text + copy ======
+  function buildReportText() {
+    var closedCards = document.querySelectorAll("#closedList .job-card");
+    var lines = [];
+
+    lines.push(TEAM_LABELS[state.team] || state.team);
+    lines.push(formatDateSlash(state.date) + " " + (state.shift === "Day" ? "D\\S" : "N\\S"));
+    lines.push("");
+
+    var totalMinutes = 0;
+
+    closedCards.forEach(function (card) {
+      var machine = card.dataset.machineName || "";
+      var desc = card.querySelector('[data-field="description"]').value.trim();
+      var cause = card.querySelector('[data-field="cause"]').value.trim();
+      var correction = card.querySelector('[data-field="correction"]').value.trim();
+      var timeRangeEl = card.querySelector(".time-range");
+      var timeRange = timeRangeEl ? timeRangeEl.textContent : "-";
+
+      lines.push("-" + machine);
+      lines.push("อาการ =" + desc);
+      lines.push("สาเหตุ =" + cause);
+      lines.push("การแก้ไข =" + correction);
+      lines.push("เวลา =" + timeRange);
+      lines.push("");
+    });
+
+    if (lastReport && lastReport.closed_jobs) {
+      lastReport.closed_jobs.forEach(function (job) {
+        var mins = minutesBetween(job.start_work_at, job.actual_finish_time);
+        if (mins != null) totalMinutes += mins;
+      });
+    }
+
+    lines.push("━━━━━━━━━━━━━━━━━━━━━");
+    lines.push(
+      "สรุป: " + closedCards.length + " งาน | รวมเวลาซ่อม " + formatDuration(totalMinutes)
+    );
+
+    return lines.join("\n");
+  }
+
+  function formatDateSlash(isoDate) {
+    if (!isoDate) return "";
+    var parts = isoDate.split("-");
+    if (parts.length !== 3) return isoDate;
+    var yy = parts[0].slice(2);
+    return parts[2] + "\\" + parts[1] + "\\" + yy;
+  }
+
+  function minutesBetween(startIso, endIso) {
+    if (!startIso || !endIso) return null;
+    var s = new Date(/[Zz]|[+-]\d{2}:\d{2}$/.test(startIso) ? startIso : startIso + "Z");
+    var e = new Date(/[Zz]|[+-]\d{2}:\d{2}$/.test(endIso) ? endIso : endIso + "Z");
+    if (isNaN(s) || isNaN(e)) return null;
+    return Math.max(0, Math.round((e - s) / 60000));
+  }
+
+  function formatDuration(totalMinutes) {
+    var h = Math.floor(totalMinutes / 60);
+    var m = totalMinutes % 60;
+    if (h === 0) return m + " นาที";
+    if (m === 0) return h + " ชม.";
+    return h + " ชม. " + m + " นาที";
+  }
+
+  copyBtn.addEventListener("click", function () {
+    var text = buildReportText();
+    var done = function () {
+      copyBtn.textContent = "คัดลอกแล้ว ✓";
+      copyBtn.classList.add("copied");
+      setTimeout(function () {
+        copyBtn.textContent = "คัดลอกรายงาน";
+        copyBtn.classList.remove("copied");
+      }, 1800);
+    };
+    var fail = function () {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand("copy");
+        done();
+      } catch (e) {
+        alert("คัดลอกไม่สำเร็จ กรุณาคัดลอกด้วยตนเอง");
+      }
+      document.body.removeChild(ta);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(fail);
+    } else {
+      fail();
+    }
+  });
+
+  initDefaults();
+})();
+</script>
+</body>
+</html>
